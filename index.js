@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import productRouter from "./api/routes/products.js";
 import cartRouter from "./api/routes/cart.js"
+import wishlistRouter from "./api/routes/wishlist.js"
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded())
 app.use("/products", productRouter)
 app.use("/cart", cartRouter)
+app.use("/wishlist", wishlistRouter)
 
 
 app.use((req, res, next) => {
