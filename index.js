@@ -31,5 +31,10 @@ app.use((req, res, next) => {
     res.status(404).json({ error: "invalid url" })
 })
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+});
+
 
 app.listen(PORT, () => { console.log(`running on port:${PORT}`) })
