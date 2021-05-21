@@ -20,12 +20,11 @@ router.get("/", async (req, res, next) => {
 router.post("/", async (req, res) => {
   const product = req.body;
   const cartItem = new CartModel(product)
-  cartItem.save()
-    .then(item => res.json({ item })
-      .populate("product").execPopulate())
+  const insertedItem = await cartItem.save()
+  insertedItem.populate("product").execPopulate()
     .then(result => {
       res.status(200).
-        json({ newProduct: result })
+        json({ cart: result })
     }).
     catch(err => {
       console.log(err);

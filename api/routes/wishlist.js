@@ -18,13 +18,12 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", async (req, res) => {
     const product = req.body;
-    const wishlistItem = new WishlistModel(product)
-    await wishlistItem.save()
-        .then(item => res.json({ item })
-            .populate("product").execPopulate())
+    const wishlist = new WishlistModel(product)
+    const insertedItem = await wishlist.save()
+    insertedItem.populate("product").execPopulate()
         .then(result => {
-            res.status(200).
-                json({ newProduct: result })
+            res.status(200)
+                .json({ wishlist: result })
         }).
         catch(err => {
             console.log(err);
@@ -42,5 +41,15 @@ router.delete("/:productId", async (req, res) => {
     }
 })
 
+// router.get("/:id", (req, res, next) => {
+//     wishlistModel.find().populate("_id")
+//         .then(result => {
+//             res.status(200).json({ wishlistData: result })
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             res.status(500).json({ error: err })
+//         })
+// })
 
 export default router;
