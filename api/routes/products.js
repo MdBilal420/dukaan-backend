@@ -51,19 +51,4 @@ router.post("/", (req, res, next) => {
         })
 })
 
-
-
 export default router;
-
-
-// {
-//     "name": "SONY table speaker",
-//     "image":"https://unsplash.com/photos/0GCw3lAsfT0",
-//     "price":499,
-//     "material":"plastic",
-//     "inStock":false,
-//     "level":"Intermediate",
-//     "fastDelivery": true,
-//     "ratings":4.1,
-//     "color":"Blue"
-// }

@@ -17,20 +17,19 @@ router.get("/", async (req, res, next) => {
 
 
 router.post("/", async (req, res) => {
-    try {
-        const product = req.body;
-        const present = await WishlistModel.exists({ product: product.product._id })
-        if (present) {
-            return res.status(409).json({ success: false, message: "Duplicate" })
-        }
-        const wishlist = new WishlistModel(product)
-        const insertProduct = await wishlist.save()
-        const populateProduct = await insertProduct.populate("product").execPopulate()
-        res.json({ wishlist: populateProduct, success: true })
-    }
-    catch (error) {
-        res.status(500).json({ success: false, message: error.message })
-    }
+    const product = req.body;
+    const wishlistItem = new WishlistModel(product)
+    await wishlistItem.save()
+        .then(item => res.json({ item })
+            .populate("product").execPopulate())
+        .then(result => {
+            res.status(200).
+                json({ newProduct: result })
+        }).
+        catch(err => {
+            console.log(err);
+            res.status(500).json({ error: err })
+        })
 })
 
 router.delete("/:productId", async (req, res) => {
@@ -43,15 +42,5 @@ router.delete("/:productId", async (req, res) => {
     }
 })
 
-router.get("/:id", (req, res, next) => {
-    wishlistModel.find().populate("_id")
-        .then(result => {
-            res.status(200).json({ wishlistData: result })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({ error: err })
-        })
-})
 
 export default router;
