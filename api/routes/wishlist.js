@@ -1,5 +1,5 @@
-import express from "express";
-import WishlistModel from "../../model/wishlist.js";
+const express = require("express");
+const WishlistModel = require("../../model/wishlist.js");
 
 
 const router = express.Router()
@@ -52,4 +52,4 @@ router.delete("/:productId", async (req, res) => {
 //         })
 // })
 
-export default router;
+module.exports = router

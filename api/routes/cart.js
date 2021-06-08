@@ -1,5 +1,5 @@
-import express from "express";
-import CartModel from "../../model/cart.js";
+const express = require("express");
+const CartModel = require("../../model/cart.js");
 
 
 const router = express.Router()
@@ -43,4 +43,4 @@ router.delete("/:productId", async (req, res) => {
   }
 })
 
-export default router;
+module.exports = router
