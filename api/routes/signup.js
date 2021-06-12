@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken")
 
 const { check, validationResult } = require('express-validator')
 
-const User = require('../../model/user')
+const User = require('../../model/User')
 
 router.post("/",
     [

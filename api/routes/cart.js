@@ -1,15 +1,15 @@
 const express = require("express");
-const CartModel = require("../../model/cart.js");
-
+const auth = require("../../Middleware/auth")
 
 const router = express.Router()
 
+const Cart = require("../../model/Cart");
 
 //fetch data
-router.get("/", async (req, res, next) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const cartData = await CartModel.find({}).populate("product");
-    res.status(200).json({ cartData })
+    const cartData = await Cart.find({ user: req.user.id });
+    res.status(200).json(cartData)
   }
   catch (error) {
     res.status(500).json({ success: true, message: error.message })
@@ -17,30 +17,49 @@ router.get("/", async (req, res, next) => {
 })
 
 //post data
-router.post("/", async (req, res) => {
-  const product = req.body;
-  const cartItem = new CartModel(product)
-  const insertedItem = await cartItem.save()
-  insertedItem.populate("product").execPopulate()
-    .then(result => {
-      res.status(200).
-        json({ cart: result })
-    }).
-    catch(err => {
-      console.log(err);
-      res.status(500).json({ error: err })
+router.post("/", auth, async (req, res) => {
+  const { _id, name, image, price, brand, material, inStock, fastDelivery, ratings, color } = req.body;
+
+  try {
+    const cartItem = new Cart({
+      user: req.user.id,
+      _id,
+      name,
+      image,
+      price,
+      brand,
+      material,
+      inStock,
+      fastDelivery,
+      ratings,
+      color
     })
+    const insertedItem = await cartItem.save()
+    res.json(insertedItem)
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err })
+  }
 })
 
 // delete data
-router.delete("/:productId", async (req, res) => {
+router.delete("/:productId", auth, async (req, res) => {
   try {
-    const productId = req.params.productId
-    await CartModel.findOneAndDelete({ product: productId })
+    const product = req.params.productId
+    if (!product) {
+      res.status(404).json({ msg: "Item not found" })
+    }
+    await Cart.findByIdAndDelete(req.params.productId)
     res.status(200).json({ success: true })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }
 })
+
+
+// update cart
+
+
 
 module.exports = router
