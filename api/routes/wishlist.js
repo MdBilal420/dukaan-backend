@@ -19,41 +19,47 @@ router.get("/", auth, async (req, res) => {
 
 //post data
 router.post("/", auth, async (req, res) => {
-    const { _id, name, image, price, brand, material, inStock, fastDelivery, ratings, color } = req.body;
-
+    const present = await Wishlist.findOne({ user: req.user.id })
     try {
-        const wishlistItem = new Wishlist({
-            user: req.user.id,
-            _id,
-            name,
-            image,
-            price,
-            brand,
-            material,
-            inStock,
-            fastDelivery,
-            ratings,
-            color
-        })
-        const item = await wishlistItem.save()
-        res.json(item)
-    }
-    catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err })
+        if (present) {
+            try {
+                const wishlist = await Wishlist.findOneAndUpdate({ user: req.user.id }, {
+                    "$push": {
+                        wishlist: req.body.wishlistItems
+                    }
+                })
+                return res.status(201).json({ wishlist, msg: "item added to wishlist" })
+            } catch (error) {
+                return res.status(400).json({ error, msg: "item cannot be added to the current wishlist" })
+            }
+        } else {
+            const wishlist = new Wishlist({
+                user: req.user.id,
+                wishlist: [req.body.wishlistItems]
+            })
+            try {
+                const newWishlist = await wishlist.save()
+                return res.status(201).json({ wishlist: newWishlist.wishlist, msg: "new wishlist created" })
+            } catch (error) {
+                return res.status(400).json({ error, msg: "cannot create new wishlist" })
+            }
+        }
+    } catch (error) {
+        return res.status(400).json({ error })
     }
 })
 
 //  delete
 
-router.delete("/:productId", async (req, res) => {
+router.delete("/:productId", auth, async (req, res) => {
+
+    const present = await Wishlist.findOne({ user: req.user.id })
+    const product = req.params.productId
     try {
-        const product = req.params.productId
-        if (!product) {
-            res.status(404).json({ msg: "Item not found" })
+        if (present) {
+            await Wishlist.findOneAndDelete(product)
+            res.status(200).json({ success: true })
         }
-        await Wishlist.findByIdAndDelete(req.params.productId)
-        res.status(200).json({ success: true })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })
     }

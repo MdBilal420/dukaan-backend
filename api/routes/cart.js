@@ -17,49 +17,114 @@ router.get("/", auth, async (req, res) => {
 })
 
 //post data
-router.post("/", auth, async (req, res) => {
-  const { _id, name, image, price, brand, material, inStock, fastDelivery, ratings, color } = req.body;
 
+router.post("/", auth, async (req, res) => {
+  const found = await Cart.findOne({ user: req.user.id })
   try {
-    const cartItem = new Cart({
-      user: req.user.id,
-      _id,
-      name,
-      image,
-      price,
-      brand,
-      material,
-      inStock,
-      fastDelivery,
-      ratings,
-      color
-    })
-    const insertedItem = await cartItem.save()
-    res.json(insertedItem)
-  }
-  catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err })
+    if (found) {
+      try {
+        const cart = await Cart.findOneAndUpdate({ user: req.user.id }, {
+          "$push": {
+            cartlist: req.body.cartItems
+          }
+        })
+        return res.status(201).json({ cart, msg: "item added to cart" })
+      } catch (error) {
+        return res.status(400).json({ error, msg: "item cannot be added to the current cart" })
+      }
+    } else {
+      const cart = new Cart({
+        user: req.user.id,
+        cartlist: [req.body.cartItems]
+      })
+      try {
+        const newCart = await cart.save()
+        return res.status(201).json({ cart: newCart.cartlist, msg: "new cart created" })
+      } catch (error) {
+        return res.status(400).json({ error, msg: "cannot create new cart" })
+      }
+    }
+  } catch (error) {
+    return res.status(400).json({ error })
   }
 })
 
 // delete data
 router.delete("/:productId", auth, async (req, res) => {
+
+  const present = await Cart.findOne({ user: req.user.id })
+  const product = req.params.productId
   try {
-    const product = req.params.productId
-    if (!product) {
-      res.status(404).json({ msg: "Item not found" })
+    if (present) {
+      await Cart.findOneAndDelete(product)
+      res.status(200).json({ success: true })
     }
-    await Cart.findByIdAndDelete(req.params.productId)
-    res.status(200).json({ success: true })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }
 })
 
+// update
+
+router.post("/inc", auth, async (req, res) => {
+  const present = await Cart.findOne({ user: req.user.id })
+  const p = req.body.cartItems
+  const item = present.cartlist.find((it) => it._id === p._id)
+  console.log(item)
+  try {
+    if (present) {
+      const cartlist = await Cart.findOneAndUpdate({ user: req.user.id }, {
+        "$set": {
+          cartItems: {
+            ...req.body.cartItems,
+            quantity: item.quantity + 1
+          }
+        }
+      })
+      return res.status(201).json({ cartlist, msg: "item added to wishlist" })
+    }
+  } catch (error) {
+    return res.status(400).json({ error })
+  }
+})
 
 // update cart
 
 
+
+
+
+
+//////////////prev
+// router.post("/", auth, (req, res) => {
+//   Cart.findOne({ user: req.user.id })
+//     .exec((error, cart) => {
+//       if (error) return res.status(400).json({ error })
+//       if (cart) {
+//         console.log(req)
+//         Cart.findOneAndUpdate({ user: req.user.id }, {
+//           "$push": {
+//             "cartlist": req.body.cartItems
+//           }
+//         })
+//           .exec((error, _cart) => {
+//             if (error) return res.status(400).json({ error })
+//             if (_cart) {
+//               return res.status(201).json({ _cart })
+//             }
+//           })
+//       }
+//       else {
+//         const cart = new Cart({
+//           user: req.user.id,
+//           cartlist: [req.body.cartItems]
+//         })
+//         cart.save((error, cart) => {
+//           if (error) return res.status(400).json({ error })
+//           if (cart) return res.status(201).json({ cart })
+//         })
+//       }
+//     })
+// })
 
 module.exports = router
