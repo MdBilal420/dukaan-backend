@@ -1,6 +1,6 @@
-import express from "express";
-import mongoose from "mongoose";
-import ProductModel from "../../model/products.js";
+const express = require("express");
+const mongoose = require("mongoose");
+const ProductModel = require("../../model/products.js");
 
 const router = express.Router()
 
@@ -51,4 +51,4 @@ router.post("/", (req, res, next) => {
         })
 })
 
-export default router;
+module.exports = router
