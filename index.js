@@ -6,24 +6,17 @@ const cartRouter = require("./api/routes/cart.js");
 const wishlistRouter = require("./api/routes/wishlist.js");
 const signupRouter = require("./api/routes/signup.js")
 const loginRouter = require("./api/routes/login")
+const { initializeDBConnection } = require("./dbConfig");
 
+const connectDB = require("./config/db");
 
 const app = express();
 
+//connect db
+connectDB()
 
 
-mongoose.connect(
-    'mongodb+srv://dukandaar:dukandaar@dukaanproducts.bsubo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
-)
-const db = mongoose.connection;
-db.on("error", err => {
-    console.log("failed")
-})
 
-db.on("connected", connected => {
-    console.log("success")
-})
 
 app.use(cors())
 app.use(express.json({ extended: true }))
