@@ -1,5 +1,6 @@
 const express = require("express");
 const auth = require("../../Middleware/auth");
+const _ = require('lodash');
 
 const router = express.Router()
 
@@ -53,13 +54,21 @@ router.post("/", auth, async (req, res) => {
 
 router.delete("/:productId", auth, async (req, res) => {
 
-    const present = await Wishlist.findOne({ user: req.user.id })
+    let wishlist = await Wishlist.findOne({ user: req.user.id })
     const product = req.params.productId
+
+
+    wishlist = _.extend(wishlist,
+        {
+            wishlist: _.filter(wishlist.wishlistlist,
+                (item) => item._id !== product)
+        })
+
     try {
-        if (present) {
-            await Wishlist.findOneAndDelete(product)
-            res.status(200).json({ success: true })
-        }
+
+        await wishlist.save()
+        res.status(200).json({ success: true, wishlist })
+
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })
     }

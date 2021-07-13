@@ -1,5 +1,6 @@
 const express = require("express");
 const auth = require("../../Middleware/auth")
+const _ = require('lodash');
 
 const router = express.Router()
 
@@ -52,13 +53,21 @@ router.post("/", auth, async (req, res) => {
 // delete data
 router.delete("/:productId", auth, async (req, res) => {
 
-  const present = await Cart.findOne({ user: req.user.id })
+  let cartlist = await Cart.findOne({ user: req.user.id })
   const product = req.params.productId
+
+
+  cartlist = _.extend(cartlist,
+    {
+      cartlist: _.filter(cartlist.cartlist,
+        (item) => item._id !== product)
+    })
+
   try {
-    if (present) {
-      await Cart.findOneAndDelete(product)
-      res.status(200).json({ success: true })
-    }
+
+    await cartlist.save()
+    res.status(200).json({ success: true, cartlist })
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }
