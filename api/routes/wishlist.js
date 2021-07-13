@@ -60,7 +60,7 @@ router.delete("/:productId", auth, async (req, res) => {
 
     wishlist = _.extend(wishlist,
         {
-            wishlist: _.filter(wishlist.wishlistlist,
+            wishlist: _.filter(wishlist.wishlist,
                 (item) => item._id !== product)
         })
 
